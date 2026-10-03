@@ -18,7 +18,7 @@
         }
         iframe { width: 100%; height: 100%; border: none; }
 
-        /* フレームの左端の上に配置する全画面ボタン（×のようなアイコン風） */
+        /* フレームの左端の上に配置する全画面ボタン */
         #fullscreen-btn {
             position: absolute;
             top: 10px;
@@ -64,21 +64,18 @@
     </div>
 
     <script>
-        // 【重要】GitHub上にアップロードしてあるHTMLファイルの名前をここにリストアップしてください
-        // ファイルを追加したら、この配列に名前を追加することで自動的に選択肢に反映されます
+        // サーバー上のファイル一覧（表示名と実際のファイル名を設定）
         const serverFiles = [
-            "game1.html",
-            "game2.html"
-            // 例: "sample.html" など
+            { name: "ぷよテト", filename: "PuyoPuyo Tetris Online.html" }
         ];
 
         // ページ読み込み時にセレクトボックスの選択肢を自動生成する
         window.onload = function() {
             const select = document.getElementById('gameSelector');
-            serverFiles.forEach(filename => {
+            serverFiles.forEach(item => {
                 const option = document.createElement('option');
-                option.value = filename;
-                option.textContent = filename;
+                option.value = item.filename;
+                option.textContent = item.name;
                 select.appendChild(option);
             });
         };
@@ -104,20 +101,20 @@
             }
         }
 
-        // 全画面表示の切り替え（アイコンの見た目も変化）
+        // 全画面表示の切り替え
         function toggleFullscreen() {
             const container = document.getElementById('container');
             const btn = document.getElementById('fullscreen-btn');
             
             if (!document.fullscreenElement) {
                 container.requestFullscreen().then(() => {
-                    btn.textContent = "⤡"; // 縮小用アイコンに変更
+                    btn.textContent = "⤡"; 
                 }).catch(err => {
                     alert('全画面表示に失敗しました: ' + err.message);
                 });
             } else {
                 document.exitFullscreen().then(() => {
-                    btn.textContent = "⤢"; // 拡大用アイコンに戻す
+                    btn.textContent = "⤢"; 
                 });
             }
         }
