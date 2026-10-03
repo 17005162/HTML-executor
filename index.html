@@ -2,52 +2,123 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>ゲームポータル</title>
+    <title>HTML実行ポータル</title>
     <style>
         body { font-family: sans-serif; margin: 0; padding: 20px; background: #f0f2f5; display: flex; flex-direction: column; align-items: center; }
         h1 { margin-bottom: 10px; }
-        .menu { margin-bottom: 15px; }
-        select, button { padding: 8px 12px; font-size: 16px; margin-right: 5px; }
-        #container { width: 100%; max-width: 960px; height: 540px; background: #000; position: relative; }
+        .menu { margin-bottom: 15px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; justify-content: center; }
+        select, button, input[type="file"] { padding: 8px 12px; font-size: 16px; }
+        
+        #container { 
+            width: 100%; 
+            max-width: 960px; 
+            height: 540px; 
+            background: #000; 
+            position: relative; 
+        }
         iframe { width: 100%; height: 100%; border: none; }
+
+        /* フレームの左端の上に配置する全画面ボタン（×のようなアイコン風） */
+        #fullscreen-btn {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 10;
+            background: rgba(0, 0, 0, 0.6);
+            color: #fff;
+            border: 2px solid #fff;
+            border-radius: 4px;
+            width: 40px;
+            height: 40px;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+        #fullscreen-btn:hover {
+            background: rgba(0, 0, 0, 0.8);
+        }
     </style>
 </head>
 <body>
 
-    <h1>ゲームセレクター</h1>
+    <h1>HTML実行</h1>
     <div class="menu">
+        <!-- サーバー上のファイル選択 -->
         <select id="gameSelector">
-            <option value="">-- ゲームを選択してください --</option>
-            <option value="game1.html">ゲーム1 (game1.html)</option>
-            <option value="game2.html">ゲーム2 (game2.html)</option>
+            <option value="">-- ファイルを選択してください --</option>
         </select>
-        <button onclick="loadGame()">プレイする</button>
-        <button onclick="toggleFullscreen()">画面いっぱいに拡大</button>
+        <button onclick="loadGame()">実行</button>
+
+        <!-- ローカルからのファイルアップロード実行 -->
+        <input type="file" id="localFileInput" accept=".html" style="display: none;" onchange="loadLocalFile(event)">
+        <button onclick="document.getElementById('localFileInput').click()">ファイルを開く</button>
     </div>
 
     <div id="container">
+        <!-- フレームの左端の上に配置した全画面ボタン -->
+        <button id="fullscreen-btn" onclick="toggleFullscreen()" title="全画面切替">⤢</button>
         <iframe id="gameFrame" src=""></iframe>
     </div>
 
     <script>
+        // 【重要】GitHub上にアップロードしてあるHTMLファイルの名前をここにリストアップしてください
+        // ファイルを追加したら、この配列に名前を追加することで自動的に選択肢に反映されます
+        const serverFiles = [
+            "game1.html",
+            "game2.html"
+            // 例: "sample.html" など
+        ];
+
+        // ページ読み込み時にセレクトボックスの選択肢を自動生成する
+        window.onload = function() {
+            const select = document.getElementById('gameSelector');
+            serverFiles.forEach(filename => {
+                const option = document.createElement('option');
+                option.value = filename;
+                option.textContent = filename;
+                select.appendChild(option);
+            });
+        };
+
+        // サーバー上の選択されたファイルを実行する
         function loadGame() {
             const select = document.getElementById('gameSelector');
             const frame = document.getElementById('gameFrame');
             if (select.value) {
                 frame.src = select.value;
             } else {
-                alert('ゲームを選択してください');
+                alert('ファイルを選択してください');
             }
         }
 
+        // ローカルからアップロードされたファイルを実行する
+        function loadLocalFile(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const fileURL = URL.createObjectURL(file);
+                const frame = document.getElementById('gameFrame');
+                frame.src = fileURL;
+            }
+        }
+
+        // 全画面表示の切り替え（アイコンの見た目も変化）
         function toggleFullscreen() {
             const container = document.getElementById('container');
+            const btn = document.getElementById('fullscreen-btn');
+            
             if (!document.fullscreenElement) {
-                container.requestFullscreen().catch(err => {
+                container.requestFullscreen().then(() => {
+                    btn.textContent = "⤡"; // 縮小用アイコンに変更
+                }).catch(err => {
                     alert('全画面表示に失敗しました: ' + err.message);
                 });
             } else {
-                document.exitFullscreen();
+                document.exitFullscreen().then(() => {
+                    btn.textContent = "⤢"; // 拡大用アイコンに戻す
+                });
             }
         }
     </script>
